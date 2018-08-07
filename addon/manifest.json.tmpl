@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+  "name": "Sticky Reader Mode",
+  "version": "{{version}}",
+  "description": "{{description}}",
+  "icons": {
+    "256": "generic-fox.png"
+  },
+  "author": "{{{author}}}",
+  "homepage_url": "{{{homepage}}}",
+  "applications": {
+    "gecko": {
+      "id": "sticky-reader-mode@mozilla.org",
+      "strict_min_version": "57.0a1"
+    }
+  },
+  "background": {
+    "scripts": [
+      "browser-polyfill.js",
+      "background.js"
+    ]
+  },
+  "permissions": [
+    "tabs",
+    "storage",
+    "webRequest",
+    "webRequestBlocking",
+    "mozillaAddons",
+    "about:reader*",
+    "<all_urls>"
+  ]
+}

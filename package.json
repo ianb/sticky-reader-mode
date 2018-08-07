@@ -1,0 +1,38 @@
+{
+  "name": "sticky-reader-mode",
+  "description": " A browser extension to turn on Reader Mode automatically on sites where you've used it before",
+  "version": "0.1.0",
+  "author": "Ian Bicking",
+  "bugs": {
+    "url": "https://github.com/ianb/sticky-reader-mode/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "addons-linter": "^0.37.0",
+    "eslint": "^4.16.0",
+    "eslint-plugin-mozilla": "^0.6.0",
+    "eslint-plugin-no-unsanitized": "^2.0.2",
+    "mustache": "^2.3.0",
+    "npm-run-all": "^4.1.2",
+    "web-ext": "^2.4.0"
+  },
+  "homepage": "https://github.com/ianb/sticky-reader-mode/",
+  "license": "MPL-2.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ianb/sticky-reader-mode.git"
+  },
+  "scripts": {
+    "start": "npm-run-all build run",
+    "lint": "npm-run-all lint:*",
+    "lint:addon": "npm run package && addons-linter ./addon.xpi -o text",
+    "lint:js": "eslint .",
+    "build": "mkdir -p addon/build && npm-run-all build:*",
+    "build:manifest": "node -e 'let input = JSON.parse(fs.readFileSync(\"package.json\")); input.version = input.version.slice(0, -1) + Math.floor((Date.now() - new Date(new Date().getFullYear().toString()).getTime()) / 3600000); console.log(JSON.stringify(input))' | mustache - addon/manifest.json.tmpl > addon/manifest.json",
+    "build:web-ext": "web-ext build --source-dir=addon --overwrite-dest --ignore-files '*.tmpl' && mv web-ext-artifacts/*.zip addon.xpi",
+    "package": "npm run build",
+    "run": "mkdir -p ./Profile && web-ext run --source-dir=addon -p ./Profile --browser-console --keep-profile-changes -f ${FIREFOX:-nightly}",
+    "test": "npm run lint"
+  }
+}
