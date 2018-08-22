@@ -1,21 +1,42 @@
 let readableHostnames = {};
 let lastReadable = new Map();
+let recentRedirects = new Map();
 
-browser.tabs.onUpdated.addListener(async (tabId, changeInfo, newTabInfo) => {
+function reporter(func) {
+  return async function(...args) {
+    try {
+      return func.apply(this, args);
+    } catch (e) {
+      console.error("Error in function:", e);
+      console.error(e.stack);
+      throw e;
+    }
+  }
+}
+
+browser.tabs.onUpdated.addListener(reporter(async (tabId, changeInfo, newTabInfo) => {
   let url = changeInfo.url;
   if (changeInfo.isArticle && !url) {
     // We recently found we can use the article view
     url = newTabInfo.url;
   }
+  if (recentRedirects.get(tabId)) {
+    url = newTabInfo.url;
+    recentRedirects.clear();
+    console.log("got recent redirect");
+  }
+  console.log("got update?", url, changeInfo.url, newTabInfo.url);
   if (!url) {
     // Then the URL didn't update
     return;
   }
   if (url.startsWith("about:reader")) {
     // We can't use manifest.json content_scripts on about:reader, as the matcher doesn't work. But we can inject it here:
+    console.log("Added worker to about:reader page");
     await browser.tabs.executeScript(tabId, {
       file: "reader-script.js"
     });
+    console.log("completed loading worker");
     let origUrl = readerUrlToNormal(url);
     let pat = makeUrlPattern(origUrl);
     let domain = makeDomain(origUrl);
@@ -37,24 +58,22 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, newTabInfo) => {
       await browser.tabs.toggleReaderMode(tabId);
     }
   }
-});
+}));
 
-/*
 browser.webRequest.onBeforeRequest.addListener((event) => {
   let url = event.url;
   let pat = makeUrlPattern(url);
   if (readableHostnames[pat]) {
-    let newUrl = `about:reader?url=${encodeURIComponent(url)}`;
     setTimeout(() => {
-      browser.tabs.toggleReaderMode(event.tabid);
-      // FIXME: you can't use this to redirect to about:reader
-      browser.tabs.update(event.tabId, {url: newUrl});
+      console.info("Automatically readering", url);
+      recentRedirects.set(event.tabId, url);
+      browser.openInReaderMode.open(event.tabId, url);
     }, 1000);
+    console.info("Cancelled load", url);
     return {cancel: true};
   }
   return {};
-}, {urls: ["http://*" + "/*", "https://*" + "/*"], types: ["main_frame"]}, ["blocking"]);
-*/
+}, {urls: ["http://*/*", "https://*/*"], types: ["main_frame"]}, ["blocking"]);
 
 function makeUrlPattern(url) {
   if (url.includes("?p=")) {
@@ -111,6 +130,7 @@ async function init() {
   if (result) {
     readableHostnames = result.readableHostnames || {};
   }
+  console.log("has API?", typeof browser.openInReaderMode, typeof browser.openInReaderMode.open);
 }
 
 init();

@@ -6,6 +6,8 @@ if (this.hasLoaded === undefined) {
 
 (function () {
 
+  console.log("worker loaded", hasLoaded);
+
   if (hasLoaded) {
     return;
   }
