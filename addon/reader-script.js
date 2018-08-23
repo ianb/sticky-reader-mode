@@ -6,8 +6,6 @@ if (this.hasLoaded === undefined) {
 
 (function () {
 
-  console.log("worker loaded", hasLoaded);
-
   if (hasLoaded) {
     return;
   }
@@ -22,6 +20,7 @@ if (this.hasLoaded === undefined) {
     }
     let label = document.createElement("label");
     label.setAttribute("for", "sticky-checkbox");
+    label.style.fontSize = "0.8em";
     label.innerHTML = `
     <input type="checkbox" id="sticky-checkbox">
     always use Reader Mode for articles on this site
@@ -33,7 +32,30 @@ if (this.hasLoaded === undefined) {
     });
   }
 
-  addCheckbox();
+  // Takes the link <a href="original-link" class="reader reader-domain">site name</a>
+  // and rewrites it to <a href="site">site name</a> <a href="original-link">article</a>
+  function adjustLink() {
+    let link = document.querySelector(".domain.reader-domain");
+    if (!link || !link.href) {
+      // Rendering hasn't finished
+      setTimeout(adjustLink, 100);
+      return;
+    }
+    let siteLink = document.createElement("a");
+    siteLink.className = "domain";
+    siteLink.textContent = link.textContent;
+    siteLink.href = (new URL(link.href)).origin;
+    link.textContent = "article";
+    link.parentNode.insertBefore(siteLink, link);
+    link.parentNode.insertBefore(document.createTextNode(" "), link);
+  }
+
+  try {
+    addCheckbox();
+    adjustLink();
+  } catch (e) {
+    console.error("Error adding UI:", e + "", e.stack);
+  }
 
   browser.runtime.onMessage.addListener((message) => {
     if (message.type === "setValue") {
