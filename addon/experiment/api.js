@@ -15,7 +15,6 @@ this.openInReaderMode = class API extends ExtensionAPI {
     return {
       openInReaderMode: {
         open(tabId, url) {
-          console.log("going to open in reader mode:", tabId, url);
           // eslint-disable-next-line mozilla/use-services
           let nativeTab = getTabOrActive(tabId);
           url = context.uri.resolve(url);
@@ -24,7 +23,7 @@ this.openInReaderMode = class API extends ExtensionAPI {
           }
           url = `about:reader?url=${encodeURIComponent(url)}`;
           let options = {
-            triggeringPrincipal: context.principal,
+            disallowInheritPrincipal: true,
           };
           nativeTab.linkedBrowser.loadURI(url, options);
           return true;
