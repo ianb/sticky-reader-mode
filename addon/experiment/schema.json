@@ -1,0 +1,24 @@
+[
+  {
+    "namespace": "openInReaderMode",
+    "description": "Opens a page directly in Reader Mode",
+    "functions": [
+      {
+        "name": "open",
+        "type": "function",
+        "description": "Opens a page directly in Reader Mode.",
+        "async": false,
+        "parameters": [
+          {
+            "type": "number",
+            "name": "tabId"
+          },
+          {
+            "type": "string",
+            "name": "url"
+          }
+        ]
+      }
+    ]
+  }
+]

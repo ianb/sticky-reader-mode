@@ -11,13 +11,10 @@ To test it out:
 ```sh
 $ npm install
 $ npm start
+# Or if the wrong Firefox is used:
+$ FIREFOX="/Application/Firefox Nightly.app" npm start
 ```
 
-Or to install it locally:
+Then on `about:debugging` click **Load Temporary Add-on...** and select `addon/manifest.json`
 
-```sh
-$ npm install
-$ npm build
-```
-
-Then install `addon/` as a Temporary Extension using `about:debugging`
+Note that `web-ext run` does not work due to the permissions and experiment API this uses. You must manually reload through `about:debugging`, and note that `manifest.json.tmpl` edits won't be reflected by default.

@@ -20,6 +20,16 @@
       "background.js"
     ]
   },
+  "experiment_apis": {
+    "openInReaderMode": {
+      "schema": "experiment/schema.json",
+      "parent": {
+        "scopes": ["addon_parent"],
+        "script": "experiment/api.js",
+        "paths": [["openInReaderMode"]]
+      }
+    }
+  },
   "permissions": [
     "tabs",
     "storage",
