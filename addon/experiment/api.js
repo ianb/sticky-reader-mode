@@ -1,6 +1,7 @@
 /* global ExtensionAPI:false */
 
 const { classes: Cc, interfaces: Ci, utils: Cu } = Components;
+Cu.import("resource://gre/modules/Services.jsm");
 
 function getTabOrActive(tabId) {
   let tabTracker = ChromeUtils.import("resource://gre/modules/Extension.jsm", {}).Management.global.tabTracker;
@@ -17,13 +18,14 @@ this.openInReaderMode = class API extends ExtensionAPI {
         open(tabId, url) {
           // eslint-disable-next-line mozilla/use-services
           let nativeTab = getTabOrActive(tabId);
+          let systemPrincipal = Services.scriptSecurityManager.getSystemPrincipal();
           url = context.uri.resolve(url);
           if (!context.checkLoadURL(url, {dontReportErrors: true})) {
             return Promise.reject({message: `Illegal URL: ${url}`});
           }
           url = `about:reader?url=${encodeURIComponent(url)}`;
           let options = {
-            disallowInheritPrincipal: true,
+            triggeringPrincipal: systemPrincipal,
           };
           nativeTab.linkedBrowser.loadURI(url, options);
           return true;
